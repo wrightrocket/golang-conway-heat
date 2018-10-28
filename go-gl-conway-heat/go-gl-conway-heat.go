@@ -60,7 +60,7 @@ const (
 )
 
 var (
-	prog                 uint32
+	program                 uint32
 	vertexShader         uint32
 	fragmentShaderRed    uint32
 	fragmentShaderYellow uint32
@@ -138,11 +138,9 @@ func main() {
 	parseFlags()
 	fmt.Println("Using: fps =", fps, "and chance =", chance)
 	runtime.LockOSThread()
-
 	window := initGlfw()
 	defer glfw.Terminate()
-	program := initOpenGL()
-	prog = program
+	initOpenGL()
 	cells := makeCells()
 	cellsTotal := float64(len(cells) * 100.0)
 	rounds := 0
@@ -165,7 +163,7 @@ func main() {
 		rounds += 1
 		aliveTotalRepeated = roundCheck(aliveTotal, aliveTotalLast, aliveTotalRepeated, rounds, totalTime)
 		outputFormat(aliveTotal, cellsTotal, rounds)
-		draw(cells, window, program)
+		draw(cells, window)
 
 		time.Sleep(time.Second/time.Duration(fps) - time.Since(t))
 	}
@@ -224,7 +222,7 @@ func outputFormat(aliveTotal float64, cellsTotal float64, rounds int) {
 
 }
 
-func draw(cells [][]*cell, window *glfw.Window, program uint32) {
+func draw(cells [][]*cell, window *glfw.Window) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	gl.UseProgram(program)
 
@@ -295,29 +293,29 @@ func (c *cell) draw() {
 	if c.alive {
 		if showcolor {
 			gl.BindVertexArray(c.drawable)
-			gl.AttachShader(prog, c.color)
-			gl.LinkProgram(prog)
+			gl.AttachShader(program, c.color)
+			gl.LinkProgram(program)
 			gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
-			gl.DetachShader(prog, c.color)
+			gl.DetachShader(program, c.color)
 
 		} else {
 			gl.BindVertexArray(c.drawable)
-			gl.AttachShader(prog, fragmentShaderBlue)
-			gl.AttachShader(prog, fragmentShaderRed)
-			gl.AttachShader(prog, fragmentShaderGreen)
-			gl.LinkProgram(prog)
+			gl.AttachShader(program, fragmentShaderBlue)
+			gl.AttachShader(program, fragmentShaderRed)
+			gl.AttachShader(program, fragmentShaderGreen)
+			gl.LinkProgram(program)
 			gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
-			gl.DetachShader(prog, fragmentShaderBlue)
-			gl.DetachShader(prog, fragmentShaderRed)
-			gl.DetachShader(prog, fragmentShaderGreen)
+			gl.DetachShader(program, fragmentShaderBlue)
+			gl.DetachShader(program, fragmentShaderRed)
+			gl.DetachShader(program, fragmentShaderGreen)
 		}
 	} else if shownext && c.aliveNext {
 		gl.BindVertexArray(c.drawable)
-		gl.AttachShader(prog, fragmentShaderBlue)
-		gl.AttachShader(prog, fragmentShaderRed)
-		gl.LinkProgram(prog)
+		gl.AttachShader(program, fragmentShaderBlue)
+		gl.AttachShader(program, fragmentShaderRed)
+		gl.LinkProgram(program)
 		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
-		gl.DetachShader(prog, c.color)
+		gl.DetachShader(program, c.color)
 	} else {
 		return
 	}
@@ -414,8 +412,8 @@ func initGlfw() *glfw.Window {
 	return window
 }
 
-// initOpenGL initializes OpenGL and returns an intiialized program.
-func initOpenGL() uint32 {
+// initOpenGL initializes OpenGL and set global program.
+func initOpenGL() {
 	if err := gl.Init(); err != nil {
 		panic(err)
 	}
@@ -436,10 +434,9 @@ func initOpenGL() uint32 {
 		panic(err)
 	}
 
-	prog := gl.CreateProgram()
-	gl.AttachShader(prog, vertexShader)
-	gl.LinkProgram(prog)
-	return prog
+	program = gl.CreateProgram()
+	gl.AttachShader(program, vertexShader)
+	gl.LinkProgram(program)
 }
 
 // makeVao initializes and returns a vertex array from the points provided.
