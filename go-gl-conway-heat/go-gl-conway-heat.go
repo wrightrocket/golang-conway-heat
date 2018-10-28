@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-gl/gl/v4.1-core/gl" // OR: github.com/go-gl/gl/v2.1/gl
+	"github.com/go-gl/glfw/v3.2/glfw"
 	"log"
 	"math/rand"
 	"os"
@@ -9,11 +11,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"github.com/go-gl/gl/v4.1-core/gl" // OR: github.com/go-gl/gl/v2.1/gl
-	"github.com/go-gl/glfw/v3.2/glfw"
 )
 
 const (
+	EXIT_TOTAL_TIME    = 0
+	EXIT_NO_LIFE       = 1
+	EXIT_STABLE_LIFE   = 2
 	vertexShaderSource = `
 		#version 410
 		in vec3 vp;
@@ -56,22 +59,27 @@ const (
 )
 
 var (
-	prog uint32
-	vertexShader uint32
-	fragmentShaderRed uint32
+	prog                 uint32
+	vertexShader         uint32
+	fragmentShaderRed    uint32
 	fragmentShaderYellow uint32
-	fragmentShaderGreen uint32
-	fragmentShaderBlue uint32
+	fragmentShaderGreen  uint32
+	fragmentShaderBlue   uint32
 
-	width  = 500 // TODO  add key binding to change ... 
-	height = 500 // TODO
+	width   = 500 // TODO  add key binding to change ...
+	height  = 500 // TODO
 	rows    = 100 // TODO
 	columns = 100 // TODO
 
-	threshold float64 // TODO
-	fps int  // TODO add key binding to change 
-
-	square = []float32{
+	threshold    float64 // TODO
+	fps          int     // TODO add key binding to change
+	alivePercent = 0.0
+	fmtChosen    = 0 // TODO add flag
+	timeStart    = time.Now()
+	timeAtEnd    = "5s"
+	timeToRun    = "10s"
+	timeTotal    = "0s"
+	square       = []float32{
 		-0.5, 0.5, 0,
 		-0.5, -0.5, 0,
 		0.5, -0.5, 0,
@@ -96,43 +104,41 @@ type cell struct {
 func main() {
 	cliArgs := os.Args
 	args := len(cliArgs)
-	var err error 
+	var err error
 	// [1] fps [2] threshold
 	switch args {
-		case 3:
-			fps, err = strconv.Atoi(cliArgs[1])
-			if fps > 60 || fps < 0 {
-				fps = 1
-			}
-			if err != nil {
-				fmt.Println("TODO: Oops")
-			}
-			threshold, err = strconv.ParseFloat(cliArgs[2], 64)
-			if threshold > 1.0 || threshold < 0.01 {
-				threshold = 0.25
-			}
-			if err != nil {
-				fmt.Println("TODO: Oops")
-			}
-			fmt.Printf("Using fps=%v and threshold=%v/n",fps,threshold)
-		case 2:
-			fps, err = strconv.Atoi(cliArgs[1])
-			if fps > 60 || fps < 0 {
-				fps = 1
-			}
-			if err != nil {
-				fmt.Println("TODO: Oops")
-			}
-			if threshold > 1.0 || threshold < 0.01 {
-				threshold = 0.25
-			}
-			fmt.Printf("Using fps=%v and threshold=%v/n",fps,threshold)
-		default:
+	case 3:
+		fps, err = strconv.Atoi(cliArgs[1])
+		if fps > 60 || fps < 0 {
 			fps = 1
-			threshold = 0.25
-			fmt.Printf("Using default fps=%v and threshold=%v\n",fps,threshold)
-			fmt.Println("Usage: go-gl-conway [fps] [%initial_life]")
 		}
+		if err != nil {
+			fmt.Println("TODO: Oops")
+		}
+		threshold, err = strconv.ParseFloat(cliArgs[2], 64)
+		if threshold > 1.0 || threshold < 0.01 {
+			threshold = 0.25
+		}
+		if err != nil {
+			fmt.Println("TODO: Oops")
+		}
+	case 2:
+		fps, err = strconv.Atoi(cliArgs[1])
+		if fps > 60 || fps < 0 {
+			fps = 1
+		}
+		if err != nil {
+			fmt.Println("TODO: Oops")
+		}
+		if threshold > 1.0 || threshold < 0.01 {
+			threshold = 0.25
+		}
+	default:
+		fps = 1
+		threshold = 0.025
+		fmt.Println("Usage: go-gl-conway [fps] [%initial_life]")
+	}
+	fmt.Println("Using: fps =", fps, "and threshold =", threshold)
 	runtime.LockOSThread()
 
 	window := initGlfw()
@@ -140,15 +146,63 @@ func main() {
 	program := initOpenGL()
 	prog = program
 	cells := makeCells()
+	cellsTotal := float64(len(cells) * 100.0)
+	rounds := 0
+	aliveTotal := threshold
+	aliveTotalLast := 0.0
+	aliveTotalRepeated := 0
+	timeDuration, _ := time.ParseDuration(timeToRun)
 	for !window.ShouldClose() {
 		t := time.Now()
-
+		totalTime := time.Since(timeStart)
+		if aliveTotal == 0 {
+			fmt.Println("Life has died out completely.")
+			os.Exit(1)
+		}
+		if aliveTotal == aliveTotalLast { // make checkAlive function TODO
+			aliveTotalRepeated += 1
+			if aliveTotalRepeated > 1 {
+				fmt.Println("Initial chance of life", fmt.Sprintf("% 5.2f%%",
+					threshold), "has stabilized at", aliveTotal,
+					"lives after", rounds, "rounds")
+				timeToSleep, _ := time.ParseDuration(timeAtEnd) // TODO ERROR
+				fmt.Println("Sleeping for", fmt.Sprintf("%s", timeToSleep))
+				time.Sleep(timeToSleep) // TODO -t timeout
+				os.Exit(2)
+			}
+		} else {
+			aliveTotalRepeated = 0
+		}
+		if totalTime > timeDuration {
+			fmt.Println("Life has stopped running after", fmt.Sprintf("%v", timeToRun),
+				"according to the timeToRun parameter")
+			os.Exit(0)
+		}
+		aliveTotalLast = aliveTotal
+		aliveTotal = 0
 		for x := range cells {
 			for _, c := range cells[x] {
 				c.checkState(cells)
+				if c.alive {
+					aliveTotal += 1.0
+				}
 			}
 		}
+		alivePercent = aliveTotal / cellsTotal * 100
+		alivePercentString := fmt.Sprintf("% 9.2f%%", alivePercent)
+		rounds += 1
+		switch fmtChosen {
+		case 1:
+			fmt.Println(" life with", aliveTotal, "cells alive and", cellsTotal, "total cells after", rounds, "rounds")
+		case 2:
+			fmt.Printf("%v,%v,%v,%5.2f\n", rounds, aliveTotal, cellsTotal, alivePercent)
+		case 3:
+			fmt.Println(rounds, aliveTotal, cellsTotal, alivePercentString)
+		default:
+			fmt.Println("Round:", fmt.Sprintf("% 7.0f", float64(rounds)),
+				"         Alive:", alivePercentString)
 
+		}
 		draw(cells, window, program)
 
 		time.Sleep(time.Second/time.Duration(fps) - time.Since(t))
@@ -234,26 +288,26 @@ func (c *cell) draw() {
 	gl.BindVertexArray(c.drawable)
 	shaderColor := c.color
 	switch shaderColor {
-		case fragmentShaderRed:
-			gl.AttachShader(prog, c.color)
-			gl.LinkProgram(prog)
-			gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
-			gl.DetachShader(prog, fragmentShaderRed)
-		case fragmentShaderYellow:
-			gl.AttachShader(prog, fragmentShaderYellow)
-			gl.LinkProgram(prog)
-			gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
-			gl.DetachShader(prog, fragmentShaderYellow)
-		case fragmentShaderGreen:
-			gl.AttachShader(prog, fragmentShaderGreen)
-			gl.LinkProgram(prog)
-			gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
-			gl.DetachShader(prog, fragmentShaderGreen)
-		case fragmentShaderBlue:
-			gl.AttachShader(prog, fragmentShaderBlue)
-			gl.LinkProgram(prog)
-			gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
-			gl.DetachShader(prog, fragmentShaderBlue)
+	case fragmentShaderRed:
+		gl.AttachShader(prog, c.color)
+		gl.LinkProgram(prog)
+		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
+		gl.DetachShader(prog, fragmentShaderRed)
+	case fragmentShaderYellow:
+		gl.AttachShader(prog, fragmentShaderYellow)
+		gl.LinkProgram(prog)
+		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
+		gl.DetachShader(prog, fragmentShaderYellow)
+	case fragmentShaderGreen:
+		gl.AttachShader(prog, fragmentShaderGreen)
+		gl.LinkProgram(prog)
+		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
+		gl.DetachShader(prog, fragmentShaderGreen)
+	case fragmentShaderBlue:
+		gl.AttachShader(prog, fragmentShaderBlue)
+		gl.LinkProgram(prog)
+		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
+		gl.DetachShader(prog, fragmentShaderBlue)
 	}
 }
 
@@ -271,9 +325,9 @@ func (c *cell) checkState(cells [][]*cell) {
 		}
 
 		// 2. Any live cell with two or three live neighbours lives on to the next generation.
-		if liveCount == 2  {
+		if liveCount == 2 {
 			c.aliveNext = true
-                        c.color = fragmentShaderGreen
+			c.color = fragmentShaderGreen
 		}
 
 		if liveCount == 3 {
@@ -360,7 +414,7 @@ func initOpenGL() uint32 {
 		panic(err)
 	}
 
-        vertexShader = vertShader
+	vertexShader = vertShader
 	fragmentShaderRed, err = compileShader(fragmentShaderSourceRed, gl.FRAGMENT_SHADER)
 	fragmentShaderGreen, err = compileShader(fragmentShaderSourceGreen, gl.FRAGMENT_SHADER)
 	fragmentShaderBlue, err = compileShader(fragmentShaderSourceBlue, gl.FRAGMENT_SHADER)
