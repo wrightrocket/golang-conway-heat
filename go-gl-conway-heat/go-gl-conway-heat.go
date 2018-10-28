@@ -17,7 +17,7 @@ const (
 	EXIT_NO_LIFE       = 1
 	EXIT_STABLE_LIFE   = 2
 	EXIT_TOTAL_TIME    = 3
-	EXIT_TOTAL_ROUNDS    = 4
+	EXIT_TOTAL_ROUNDS  = 4
 	vertexShaderSource = `
 		#version 410
 		in vec3 vp;
@@ -82,11 +82,11 @@ var (
 	timedelay      = "5s"
 	timerun        = "0d0h0m0s"
 	timeTotal      = "0s"
-	timeToSleep   time.Duration
-	timeDuration  time.Duration
-	shownext 	= true
-	showcolor 	= true
-	maxrounds = 0
+	timeToSleep    time.Duration
+	timeDuration   time.Duration
+	shownext       = true
+	showcolor      = true
+	maxrounds      = 0
 	square         = []float32{
 		-0.5, 0.5, 0,
 		-0.5, -0.5, 0,
@@ -162,8 +162,8 @@ func main() {
 				}
 			}
 		}
-		aliveTotalRepeated = roundCheck(aliveTotal, aliveTotalLast, aliveTotalRepeated, rounds, totalTime)
 		rounds += 1
+		aliveTotalRepeated = roundCheck(aliveTotal, aliveTotalLast, aliveTotalRepeated, rounds, totalTime)
 		outputFormat(aliveTotal, cellsTotal, rounds)
 		draw(cells, window, program)
 
@@ -171,39 +171,40 @@ func main() {
 	}
 }
 
-func roundCheck(aliveTotal float64, aliveTotalLast float64, aliveTotalRepeated int, rounds int, totalTime time.Duration) (int) {
+func roundCheck(aliveTotal float64, aliveTotalLast float64, aliveTotalRepeated int, rounds int, totalTime time.Duration) int {
 
-		if aliveTotal == 0 {
-			fmt.Println("Life has died out completely.")
-			os.Exit(EXIT_NO_LIFE)
-		}
-		if aliveTotal == aliveTotalLast { // make checkAlive function TODO
-			aliveTotalRepeated += 1
-			if aliveTotalRepeated > 1 {
-				fmt.Println("Initial chance of life", fmt.Sprintf("% 5.2f%%",
-					chance), "has stabilized at", aliveTotal,
-					"lives after", rounds, "rounds")
-				fmt.Println("Sleeping for", fmt.Sprintf("%s", timeToSleep))
-				time.Sleep(timeToSleep) // TODO -t timeout
-				os.Exit(EXIT_STABLE_LIFE)
-			} 
-		} else {
-			aliveTotalRepeated = 0
-		}
-		if timeDuration > time.Second && totalTime > timeDuration {
-			fmt.Println("Life has stopped running after", fmt.Sprintf("%v", timerun),
-				"according to the timerun parameter")
-			os.Exit(EXIT_TOTAL_TIME)
-		}
-
-		if maxrounds > 0 && rounds > maxrounds {
-
-			fmt.Println("Life has stopped running after", fmt.Sprintf("%v", rounds),
-				"according to the maxrounds parameter")
-			os.Exit(EXIT_TOTAL_ROUNDS)
-		}
-		return aliveTotalRepeated
+	if aliveTotal == 0 {
+		fmt.Println("Life has died out completely.")
+		os.Exit(EXIT_NO_LIFE)
 	}
+	if aliveTotal == aliveTotalLast { // make checkAlive function TODO
+		aliveTotalRepeated += 1
+		if aliveTotalRepeated > 1 {
+			fmt.Println("Initial chance of life", fmt.Sprintf("% 5.2f%%",
+				chance), "has stabilized at", aliveTotal,
+				"lives after", rounds, "rounds")
+			fmt.Println("Sleeping for", fmt.Sprintf("%s", timeToSleep))
+			time.Sleep(timeToSleep) // TODO -t timeout
+			os.Exit(EXIT_STABLE_LIFE)
+		}
+	} else {
+		aliveTotalRepeated = 0
+	}
+	if timeDuration > time.Second && totalTime > timeDuration {
+		fmt.Println("Life has stopped running after", fmt.Sprintf("%v", timerun),
+			"according to the timerun parameter")
+		os.Exit(EXIT_TOTAL_TIME)
+	}
+
+	if maxrounds > 0 && rounds > maxrounds {
+
+		fmt.Println("Life has stopped running after", fmt.Sprintf("%v", rounds),
+			"according to the maxrounds parameter")
+		os.Exit(EXIT_TOTAL_ROUNDS)
+	}
+	return aliveTotalRepeated
+}
+
 func outputFormat(aliveTotal float64, cellsTotal float64, rounds int) {
 	alivePercent := aliveTotal / cellsTotal * 100
 	alivePercentString := fmt.Sprintf("% 9.2f%%", alivePercent)
@@ -256,6 +257,7 @@ func makeCells() [][]*cell {
 	}
 	return cells
 }
+
 func newCell(x, y int) *cell {
 	points := make([]float32, len(square), len(square))
 	copy(points, square)
@@ -292,23 +294,23 @@ func newCell(x, y int) *cell {
 func (c *cell) draw() {
 	if c.alive {
 		if showcolor {
-		gl.BindVertexArray(c.drawable)
-		gl.AttachShader(prog, c.color)
-		gl.LinkProgram(prog)
-		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
-		gl.DetachShader(prog, c.color)
+			gl.BindVertexArray(c.drawable)
+			gl.AttachShader(prog, c.color)
+			gl.LinkProgram(prog)
+			gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
+			gl.DetachShader(prog, c.color)
 
-	} else {
-                gl.BindVertexArray(c.drawable)
-                gl.AttachShader(prog, fragmentShaderBlue)
-                gl.AttachShader(prog, fragmentShaderRed)
-                gl.AttachShader(prog, fragmentShaderGreen)
-                gl.LinkProgram(prog)
-                gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
-                gl.DetachShader(prog, fragmentShaderBlue)
-                gl.DetachShader(prog, fragmentShaderRed)
-                gl.DetachShader(prog, fragmentShaderGreen)
-	}
+		} else {
+			gl.BindVertexArray(c.drawable)
+			gl.AttachShader(prog, fragmentShaderBlue)
+			gl.AttachShader(prog, fragmentShaderRed)
+			gl.AttachShader(prog, fragmentShaderGreen)
+			gl.LinkProgram(prog)
+			gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
+			gl.DetachShader(prog, fragmentShaderBlue)
+			gl.DetachShader(prog, fragmentShaderRed)
+			gl.DetachShader(prog, fragmentShaderGreen)
+		}
 	} else if shownext && c.aliveNext {
 		gl.BindVertexArray(c.drawable)
 		gl.AttachShader(prog, fragmentShaderBlue)
