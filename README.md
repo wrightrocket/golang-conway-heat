@@ -5,7 +5,9 @@ Conway's Game of Life written in Go with heat map color to show neighbor density
 <pre>Usage of ./go-gl-conway-heat:
   -c	Same as -color. (default true)
   -color
-    	If true, the number of neighbors a live cell is colored red &gt; 3, yellow = 3, green = 2, and blue &lt; 2. If false, then live cells will appear white. (default true)
+    	If true, the number of neighbors a live cell is colored:
+      red &gt; 3, yellow = 3, green = 2, and blue &lt; 
+      If false, then live cells will appear white. (default true)
   -d string
     	Same as -delay. (default &quot;5s&quot;)
   -delay string
@@ -22,6 +24,10 @@ Conway's Game of Life written in Go with heat map color to show neighbor density
     	Same as -grid. (default 100)
   -grid int
     	Sets both the number of rows and columns for the game grid. (default 100)
+  -h  
+      Same as -help
+  -help
+      Display these usage options
   -n	Same as -next. (default true)
   -next
     	Boolean to determine if next alive cell is shown as a purple color.  (default true)
