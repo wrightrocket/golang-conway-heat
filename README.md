@@ -6,7 +6,7 @@ Conway's Game of Life written in Go with heat map color to show neighbor density
   -c	Same as -color. (default true)
   -color
     	If true, the number of neighbors a live cell is colored:
-      red &gt; 3, yellow = 3, green = 2, and blue &lt; 
+      red &gt; 3, yellow = 3, green = 2, and blue &lt; 2.
       If false, then live cells will appear white. (default true)
   -d string
     	Same as -delay. (default &quot;5s&quot;)
