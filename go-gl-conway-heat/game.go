@@ -36,16 +36,6 @@ var (
 	timeTotal    = "0s"
 )
 
-type cell struct {
-	drawable uint32
-
-	alive     bool
-	aliveNext bool
-	color     uint32
-
-	x int
-	y int
-}
 
 func main() {
 	var (
