@@ -15,7 +15,8 @@ Conway's Game of Life written in Go with heat map color to show neighbor density
   -e string
     	Same as -expire. (default &quot;0d0h0m0s&quot;)
   -expire string
-    	Sets the amount of time to run the game. When -expire is a zero duration, it removes any time constraint. (default &quot;0d0h0m0s&quot;)
+    	Sets the amount of time to run the game. When -expire is a zero duration, 
+      it removes any time constraint. (default &quot;0d0h0m0s&quot;)
   -f int
     	Same as -fps. (default 5)
   -fps int
@@ -34,17 +35,20 @@ Conway's Game of Life written in Go with heat map color to show neighbor density
   -p float
     	Same as -probability. (default 0.15)
   -probability float
-    	A percentage between 0 and 1 used in conjunction with the -seed to determine if a cell starts alive. For example, 0.15 means each cell has a 15% probability of starting alive. (default 0.15)
+    	A percentage between 0 and 1 used in conjunction to determine if a cell starts alive. 
+      For example, 0.15 means each cell has a 15% probability of starting alive. (default 0.15)
   -r int
     	Same as -report.
   -report int
-    	Sets the output report. 1: detailed, 2: comma separated, 3: space separated, 4: round number and alive percentage. The default is no output.
+    	Sets the output report. 1: detailed, 2: comma separated, 3: space separated, 
+      4: round number and alive percentage. The default is no output.
   -s int
     	Same as -seed. (default 1540779614326849845)
   -seed int
-    	Sets the starting seed of the game, used to randomize the initial state. (default 1540779614326849845)
+    	Sets the starting seed of the game, used to randomize the initial state. 
   -t int
     	Same as -turns
   -turns int
-    	Integer for how many turns to execute. When -turns is zero, it removes any constraint on the number of turns.
+    	Integer for how many turns to execute. When -turns is zero, 
+      it removes any constraint on the number of turns.
 </pre>
