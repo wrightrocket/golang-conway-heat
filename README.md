@@ -43,7 +43,7 @@ Conway's Game of Life written in Go with heat map color to show neighbor density
     	Sets the output report. 1: detailed, 2: comma separated, 3: space separated, 
       4: round number and alive percentage. The default is no output.
   -s int
-    	Same as -seed. (default 1540779614326849845)
+    	Same as -seed. (default <based upon current time>)
   -seed int
     	Sets the starting seed of the game, used to randomize the initial state. 
   -t int
