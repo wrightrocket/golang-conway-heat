@@ -36,7 +36,6 @@ var (
 	timeTotal    = "0s"
 )
 
-
 func main() {
 	var (
 		aliveTotal         float64

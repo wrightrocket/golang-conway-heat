@@ -6,7 +6,7 @@ import (
 )
 
 var (
-	seed                 = time.Now().UnixNano()
+	seed = time.Now().UnixNano()
 )
 
 type cell struct {
