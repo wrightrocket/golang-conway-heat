@@ -122,6 +122,11 @@ func parseFlags() {
 	flag.IntVar(&maxTurns, "turns", maxTurns,
 		"Integer for how many turns to execute. When -turns is zero, it removes any constraint on the number of turns.")
 	flag.Parse()
+	validateSettings()
+	outputSettings()
+}
+
+func validateSettings() {
 	if fps > 60 || fps < 0 {
 		fps = fps_default
 	}
@@ -133,7 +138,6 @@ func parseFlags() {
 	height = width   // TODO
 	timeDuration, _ = time.ParseDuration(timeExpire)
 	timeToSleep, _ = time.ParseDuration(timeDelay) // TODO ERROR
-	outputSettings()
 }
 
 func outputSettings() {
