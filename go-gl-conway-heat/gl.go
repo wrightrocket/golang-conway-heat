@@ -65,6 +65,29 @@ const (
 		}
 	` + "\x00"
 )
+var (
+	fragmentShaderBlue   uint32
+	fragmentShaderGreen  uint32
+	fragmentShaderPurple uint32
+	fragmentShaderRed    uint32
+	fragmentShaderWhite  uint32
+	fragmentShaderYellow uint32
+	fragmentVertexShader uint32
+
+	height               = width // assignment to variable not declared yet,yes!
+
+	square = []float32{
+		-0.5, 0.5, 0,
+		-0.5, -0.5, 0,
+		0.5, -0.5, 0,
+
+		-0.5, 0.5, 0,
+		0.5, 0.5, 0,
+		0.5, -0.5, 0,
+	}
+
+	width        = 5 * grid // TODO
+)
 
 func draw(cells [][]*cell, window *glfw.Window) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)

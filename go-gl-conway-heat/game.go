@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"flag"
+	"fmt"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"os"
 	"runtime"
@@ -10,49 +10,30 @@ import (
 )
 
 const (
-	EXIT_NO_LIFE       = 1
-	EXIT_STABLE_LIFE   = 2
-	EXIT_TOTAL_TIME    = 3
-	EXIT_TOTAL_TURNS  = 4
+	EXIT_NO_LIFE     = 1
+	EXIT_STABLE_LIFE = 2
+	EXIT_TOTAL_TIME  = 3
+	EXIT_TOTAL_TURNS = 4
 )
 
 var (
-	alivePercent        = 0.0
-	fps                 = 5
-	fps_default         = 5
-	fragmentShaderBlue   uint32
-	fragmentShaderGreen  uint32
-	fragmentShaderPurple uint32
-	fragmentShaderRed    uint32
-	fragmentShaderWhite  uint32
-	fragmentShaderYellow uint32
-	fragmentVertexShader uint32
-	grid   = 100      // TODO
-	height = width    // TODO
-	maxTurns            = 0
+	alivePercent = 0.0
+	fps          = 5
+	fps_default  = 5
+	grid         = 100 // TODO
+	maxTurns     = 0
 	odds         = 0.15
 	odds_default = 0.15
-	program              uint32
-	report              = 0
-	seed                = time.Now().UnixNano()
-	showColor           = true
-	showNext            = true
-	square              = []float32{
-		-0.5, 0.5, 0,
-		-0.5, -0.5, 0,
-		0.5, -0.5, 0,
-
-		-0.5, 0.5, 0,
-		0.5, 0.5, 0,
-		0.5, -0.5, 0,
-	}
-	timeDelay           = "5s"
-	timeDuration        time.Duration
-	timeExpire          = "0d0h0m0s"
-	timeStart           = time.Now()
-	timeToSleep         time.Duration
-	timeTotal           = "0s"
-	width  = 5 * grid // TODO
+	program      uint32
+	report       = 0
+	showColor    = true
+	showNext     = true
+	timeDelay    = "5s"
+	timeDuration time.Duration
+	timeExpire   = "0d0h0m0s"
+	timeStart    = time.Now()
+	timeToSleep  time.Duration
+	timeTotal    = "0s"
 )
 
 type cell struct {
@@ -68,21 +49,26 @@ type cell struct {
 
 func main() {
 	var (
-		aliveTotal float64
-		aliveTotalLast float64
+		aliveTotal         float64
+		aliveTotalLast     float64
 		aliveTotalRepeated int
-		turns int
+		cells              [][]*cell
+		cellsTotal         float64
+		timeLast           time.Time
+		turns              int
+		totalTime          time.Duration
+		window             *glfw.Window
 	)
 	parseFlags()
 	runtime.LockOSThread()
-	window := initGlfw()
+	window = initGlfw()
 	defer glfw.Terminate()
 	initOpenGL()
-	cells := makeCells()
-	cellsTotal := float64(len(cells) * 100.0)
+	cells = makeCells()
+	cellsTotal = float64(len(cells) * 100.0)
 	for !window.ShouldClose() {
-		t := time.Now()
-		totalTime := time.Since(timeStart)
+		timeLast = time.Now()
+		totalTime = time.Since(timeStart)
 		aliveTotalLast = aliveTotal
 		aliveTotal = 0
 		for x := range cells {
@@ -100,7 +86,7 @@ func main() {
 
 		draw(cells, window)
 
-		time.Sleep(time.Second/time.Duration(fps) - time.Since(t))
+		time.Sleep(time.Second/time.Duration(fps) - time.Since(timeLast))
 	}
 }
 
@@ -170,14 +156,14 @@ func checkTurn(aliveTotal float64, aliveTotalLast float64, aliveTotalRepeated in
 		fmt.Println("Life has died out completely.")
 		os.Exit(EXIT_NO_LIFE)
 	}
-	if aliveTotal == aliveTotalLast { 
+	if aliveTotal == aliveTotalLast {
 		aliveTotalRepeated += 1
 		if aliveTotalRepeated > 1 {
 			fmt.Println("Initial odds of life", fmt.Sprintf("% 5.2f%%",
 				odds), "has stabilized at", aliveTotal,
 				"lives after", turns, "turns")
 			fmt.Println("Delaying for", fmt.Sprintf("%s", timeToSleep))
-			time.Sleep(timeToSleep) 
+			time.Sleep(timeToSleep)
 			os.Exit(EXIT_STABLE_LIFE)
 		}
 	} else {
@@ -213,4 +199,3 @@ func outputReport(aliveTotal float64, cellsTotal float64, turns int) {
 			"         Alive:", alivePercentString)
 	}
 }
-

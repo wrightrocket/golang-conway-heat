@@ -5,7 +5,9 @@ import (
 	"time"
 )
 
-
+var (
+	seed                 = time.Now().UnixNano()
+)
 func makeCells() [][]*cell {
 	if seed > 0 {
 		seed = time.Now().UnixNano()
@@ -128,4 +130,3 @@ func (c *cell) liveNeighbors(cells [][]*cell) int {
 
 	return liveCount
 }
-
