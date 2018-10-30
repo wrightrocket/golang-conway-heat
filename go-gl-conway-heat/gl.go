@@ -9,43 +9,19 @@ import (
 )
 
 const (
-	vertexShaderSource = `
-		#version 410
-		in vec3 vp;
-		void main() {
-			gl_Position = vec4(vp, 1.0);
-		}
-	` + "\x00"
-
-	fragmentShaderSourceRed = `
+	fragmentShaderSourceBlue = `
 		#version 410
 		out vec4 frag_colour;
 		void main() {
-			frag_colour = vec4(1.0, 0.0, 0, 1.0);
+			frag_colour = vec4(0, 0.0, 0.9, 0.8);
 		}
 	` + "\x00"
-
-	fragmentShaderSourceYellow = `
-                #version 410
-                out vec4 frag_colour;
-                void main() {
-                        frag_colour = vec4(0.9, 0.9, 0, 1.0);
-                }
-        ` + "\x00"
 
 	fragmentShaderSourceGreen = `
 		#version 410
 		out vec4 frag_colour;
 		void main() {
 			frag_colour = vec4(0, 0.8, 0, 1.0);
-		}
-	` + "\x00"
-
-	fragmentShaderSourceBlue = `
-		#version 410
-		out vec4 frag_colour;
-		void main() {
-			frag_colour = vec4(0, 0.0, 0.9, 0.8);
 		}
 	` + "\x00"
 
@@ -57,11 +33,35 @@ const (
 		}
 	` + "\x00"
 
+	fragmentShaderSourceRed = `
+		#version 410
+		out vec4 frag_colour;
+		void main() {
+			frag_colour = vec4(1.0, 0.0, 0, 1.0);
+		}
+	` + "\x00"
+
 	fragmentShaderSourceWhite = `
 		#version 410
 		out vec4 frag_colour;
 		void main() {
 			frag_colour = vec4(1.0, 1.0, 1.0, 1.0);
+		}
+	` + "\x00"
+
+	fragmentShaderSourceYellow = `
+                #version 410
+                out vec4 frag_colour;
+                void main() {
+                        frag_colour = vec4(0.9, 0.9, 0, 1.0);
+                }
+        ` + "\x00"
+
+	fragmentVertexShaderSource = `
+		#version 410
+		in vec3 vp;
+		void main() {
+			gl_Position = vec4(vp, 1.0);
 		}
 	` + "\x00"
 )
@@ -157,13 +157,13 @@ func initOpenGL() {
 	version := gl.GoStr(gl.GetString(gl.VERSION))
 	log.Println("OpenGL version", version)
 
-	fragmentVertexShader, err := compileShader(vertexShaderSource, gl.VERTEX_SHADER)
 	fragmentShaderBlue, err = compileShader(fragmentShaderSourceBlue, gl.FRAGMENT_SHADER)
 	fragmentShaderGreen, err = compileShader(fragmentShaderSourceGreen, gl.FRAGMENT_SHADER)
 	fragmentShaderPurple, err = compileShader(fragmentShaderSourcePurple, gl.FRAGMENT_SHADER)
 	fragmentShaderRed, err = compileShader(fragmentShaderSourceRed, gl.FRAGMENT_SHADER)
 	fragmentShaderWhite, err = compileShader(fragmentShaderSourceWhite, gl.FRAGMENT_SHADER)
 	fragmentShaderYellow, err = compileShader(fragmentShaderSourceYellow, gl.FRAGMENT_SHADER)
+	fragmentVertexShader, err := compileShader(fragmentVertexShaderSource, gl.VERTEX_SHADER)
 	if err != nil {
 		panic(err)
 	}
