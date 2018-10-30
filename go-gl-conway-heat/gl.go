@@ -151,7 +151,8 @@ func initGlfw() *glfw.Window {
 
 // initOpenGL initializes OpenGL and set global program.
 func initOpenGL() {
-	if err := gl.Init(); err != nil {
+	var err error
+	if err = gl.Init(); err != nil {
 		panic(err)
 	}
 	version := gl.GoStr(gl.GetString(gl.VERSION))
