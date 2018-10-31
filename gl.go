@@ -5,7 +5,7 @@ import (
 	"github.com/4ydx/gltext/v4.1"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/go-gl/gl/v4.1-core/gl" // OR: github.com/go-gl/gl/v2.1/gl
+	"github.com/go-gl/gl/all-core/gl" //v4.1-core/gl"  OR: github.com/go-gl/gl/v2.1/gl
 	"log"
 	"strings"
 )

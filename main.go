@@ -32,11 +32,8 @@ func main() {
 
 	// code from here
 	gltext.IsDebug = true
-
-
-	
-	width, height := window.GetSize()
-	font.ResizeWindow(float32(width), float32(height))
+	// width, height := window.GetSize()
+//	font.ResizeWindow(float32(width), float32(height))
 
 	loadFont()
 	gameloop()
