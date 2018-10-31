@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"os"
-	"runtime"
 	"time"
 )
 
@@ -36,7 +35,7 @@ var (
 	timeTotal    = "0s"
 )
 
-func main() {
+func gameloop() {
 	var (
 		aliveTotal         float64
 		aliveTotalLast     float64
@@ -48,13 +47,15 @@ func main() {
 		totalTime          time.Duration
 		window             *glfw.Window
 	)
-	parseFlags()
+/*	parseFlags()
 	runtime.LockOSThread()
 	window = initGlfw()
 	defer glfw.Terminate()
 	initOpenGL()
-	cells = makeCells()
-	cellsTotal = float64(len(cells) * 100.0)
+	*/
+	// cells = makeCells()
+	// cellsTotal = float64(len(cells) * 100.0)
+	initGame()
 	for !window.ShouldClose() {
 		timeLast = time.Now()
 		totalTime = time.Since(timeStart)
@@ -71,14 +72,32 @@ func main() {
 
 		turns += 1
 		aliveTotalRepeated = checkTurn(aliveTotal, aliveTotalLast, aliveTotalRepeated, turns, totalTime)
+		alivePercent := aliveTotal / cellsTotal * 100
+		alivePercentString := fmt.Sprintf("% 9.2f%%", alivePercent)
 		outputReport(aliveTotal, cellsTotal, turns)
 
 		draw(cells, window)
+		text := v41.NewText(font, scaleMin, scaleMax)
+		text.SetString(fmt.Sprintf(alivePercentString))
+		text.SetColor(mgl32.Vec3{1, 1, 1})
+		if math.Floor(time.Now().Sub(timeStart).Seconds()) <  10 {
+			text.Draw()
+			text.Show()
+		} else {
+			text.Hide()
+		}
+
+		//drawtext(text, window)
 
 		time.Sleep(time.Second/time.Duration(fps) - time.Since(timeLast))
 	}
 }
 
+func initGame() {
+	cells = makeCells()
+	cellsTotal = float64(len(cells) * 100.0)
+
+}
 func parseFlags() {
 	flag.BoolVar(&showColor, "c", showColor, "Same as -color.")
 	flag.BoolVar(&showColor, "color", showColor,
@@ -177,8 +196,6 @@ func checkTurn(aliveTotal float64, aliveTotalLast float64, aliveTotalRepeated in
 }
 
 func outputReport(aliveTotal float64, cellsTotal float64, turns int) {
-	alivePercent := aliveTotal / cellsTotal * 100
-	alivePercentString := fmt.Sprintf("% 9.2f%%", alivePercent)
 	switch report {
 	case 1:
 		fmt.Println(alivePercentString, " life with", aliveTotal,

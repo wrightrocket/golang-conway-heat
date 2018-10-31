@@ -2,9 +2,13 @@ package main
 
 import (
 	"fmt"
-	"github.com/go-gl/gl/v4.1-core/gl" // OR: github.com/go-gl/gl/v2.1/gl
+	"github.com/4ydx/gltext"
+	"github.com/4ydx/gltext/v4.1"
 	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/go-gl/gl/v4.1-core/gl" // OR: github.com/go-gl/gl/v2.1/gl
+	"math"
 	"log"
+	"runtime"
 	"strings"
 )
 
@@ -87,6 +91,8 @@ var (
 		0.5, -0.5, 0,
 	}
 
+	useStrictCoreProfile = (runtime.GOOS == "linux")
+
 	width = 5 * grid // TODO
 )
 
@@ -130,17 +136,21 @@ func (c *cell) draw() {
 		return
 	}
 }
-
 // initGlfw initializes glfw and returns a Window to use.
 func initGlfw() *glfw.Window {
 	if err := glfw.Init(); err != nil {
 		panic(err)
 	}
 	glfw.WindowHint(glfw.Resizable, glfw.False)
-	glfw.WindowHint(glfw.ContextVersionMajor, 4)
-	glfw.WindowHint(glfw.ContextVersionMinor, 1)
+	glfw.WindowHint(glfw.ContextVersionMajor, 3)
+	glfw.WindowHint(glfw.ContextVersionMinor, 3)
+	if useStrictCoreProfile {
+		glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
+		glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
+	}
 	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
 	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
+	glfw.WindowHint(glfw.OpenGLDebugContext, glfw.True)
 	window, err := glfw.CreateWindow(width, height, "Conway's Game of Life", nil, nil)
 	if err != nil {
 		panic(err)
