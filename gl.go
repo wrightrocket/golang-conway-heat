@@ -2,13 +2,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/4ydx/gltext"
 	"github.com/4ydx/gltext/v4.1"
 	"github.com/go-gl/glfw/v3.2/glfw"
+	"github.com/go-gl/mathgl/mgl32"
 	"github.com/go-gl/gl/v4.1-core/gl" // OR: github.com/go-gl/gl/v2.1/gl
-	"math"
 	"log"
-	"runtime"
 	"strings"
 )
 
@@ -91,12 +89,10 @@ var (
 		0.5, -0.5, 0,
 	}
 
-	useStrictCoreProfile = (runtime.GOOS == "linux")
-
 	width = 5 * grid // TODO
 )
 
-func draw(cells [][]*cell, window *glfw.Window) {
+func draw(cells [][]*cell, str string, window *glfw.Window) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	gl.UseProgram(program)
 
@@ -105,7 +101,17 @@ func draw(cells [][]*cell, window *glfw.Window) {
 			c.draw()
 		}
 	}
-
+	scaleMin := 0.5
+	scaleMax := 1.0
+	text := v41.NewText(font, float32(scaleMin), float32(scaleMax))
+	text.SetString(fmt.Sprintf(alivePercentString))
+	text.SetColor(mgl32.Vec3{1, 1, 1})
+	if len(str) > 0 {
+		text.Draw()
+		text.Show()
+	} else {
+		text.Hide()
+	}
 	glfw.PollEvents()
 	window.SwapBuffers()
 }

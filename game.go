@@ -35,8 +35,8 @@ var (
 	timeTotal    = "0s"
 )
 
-func gameloop() {
 	var (
+		alivePercentString string
 		aliveTotal         float64
 		aliveTotalLast     float64
 		aliveTotalRepeated int
@@ -47,6 +47,7 @@ func gameloop() {
 		totalTime          time.Duration
 		window             *glfw.Window
 	)
+func gameloop() {
 /*	parseFlags()
 	runtime.LockOSThread()
 	window = initGlfw()
@@ -75,19 +76,8 @@ func gameloop() {
 		alivePercent := aliveTotal / cellsTotal * 100
 		alivePercentString := fmt.Sprintf("% 9.2f%%", alivePercent)
 		outputReport(aliveTotal, cellsTotal, turns)
-
-		draw(cells, window)
-		text := v41.NewText(font, scaleMin, scaleMax)
-		text.SetString(fmt.Sprintf(alivePercentString))
-		text.SetColor(mgl32.Vec3{1, 1, 1})
-		if math.Floor(time.Now().Sub(timeStart).Seconds()) <  10 {
-			text.Draw()
-			text.Show()
-		} else {
-			text.Hide()
-		}
-
-		//drawtext(text, window)
+		textString := alivePercentString
+		draw(cells, textString, window)
 
 		time.Sleep(time.Second/time.Duration(fps) - time.Since(timeLast))
 	}
