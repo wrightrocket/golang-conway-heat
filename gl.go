@@ -129,7 +129,7 @@ func draw(cells [][]*cell, window *glfw.Window) {
 			c.draw()
 		}
 	}
-	if percent {
+	if showPercent {
 		text.SetPosition(mgl32.Vec2{0, float32(height/2 - 50)})
 		text.Draw()
 		text.Show()

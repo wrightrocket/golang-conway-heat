@@ -10,6 +10,7 @@ import (
 )
 
 const (
+	EXIT_KEYPRESS    = 0 // Press ESC or q to quit normally
 	EXIT_NO_LIFE     = 1
 	EXIT_STABLE_LIFE = 2
 	EXIT_TOTAL_TIME  = 3
@@ -25,11 +26,11 @@ var (
 	maxTurns           = 0
 	odds               = 0.15
 	odds_default       = 0.15
-	percent            = true
 	program            uint32
 	report             = 0
 	showColor          = true
 	showNext           = true
+	showPercent        = true
 	timeDelay          = "5s"
 	timeDuration       time.Duration
 	timeExpire         = "0d0h0m0s"
@@ -54,6 +55,7 @@ func main() {
 	parseFlags()
 	runtime.LockOSThread()
 	window = initGlfw()
+	window.SetKeyCallback(keyCallBack)
 	defer glfw.Terminate()
 	initOpenGL()
 	loadFontConfig()
@@ -125,6 +127,22 @@ func initGame() {
 
 }
 
+func keyCallBack(w *glfw.Window, k glfw.Key, s int, a glfw.Action, mk glfw.ModifierKey) {
+	if a == glfw.Press {
+		if k == glfw.KeyEscape || k == glfw.KeyQ {
+			window.SetShouldClose(true)
+			fmt.Println("Game exited on ESC or q key press")
+			os.Exit(EXIT_KEYPRESS)
+		} else if k == glfw.KeyC {
+			showColor = !showColor
+		} else if k == glfw.KeyN {
+			showNext = !showNext
+		} else if k == glfw.KeyP {
+			showPercent = !showPercent
+		}
+	}
+}
+
 func outputReport(aliveTotal float64, cellsTotal float64, turns int) {
 	switch report {
 	case 1:
@@ -149,7 +167,7 @@ func outputSettings() {
 	fmt.Println("grid", grid)
 	fmt.Println("next", showNext)
 	fmt.Println("odds", odds)
-	fmt.Println("percent", percent)
+	fmt.Println("percent", showPercent)
 	fmt.Println("report", report)
 	fmt.Println("seed", seed)
 	fmt.Println("turns", maxTurns)
@@ -177,8 +195,8 @@ func parseFlags() {
 	flag.Float64Var(&odds, "o", odds, "Same as -odds.")
 	flag.Float64Var(&odds, "odds", odds,
 		"A percentage between 0 and 1 to determine if a cell starts alive. For example, 0.15 means each cell has a 15% chance of starting alive.")
-	flag.BoolVar(&percent, "p", percent, "Same as -percent.")
-	flag.BoolVar(&percent, "percent", percent, "Draw percent alive")
+	flag.BoolVar(&showPercent, "p", showPercent, "Same as -percent.")
+	flag.BoolVar(&showPercent, "percent", showPercent, "Draw percent alive")
 	flag.IntVar(&report, "r", report, "Same as -report.")
 	flag.IntVar(&report, "report", report,
 		"Sets the output report. 1: detailed, 2: comma separated, 3: space separated, 4: round number and alive percentage. The default is no output.")

@@ -9,6 +9,16 @@ By default, the game will the following colors according to the number of neighb
 <li>4 or more -> red
 <li>next alive -> purple
 </ul>
+<h2>Using the keyboard</h2>
+While the game is running you can press the follow keys to toggle:
+<ul>
+<li>c - show alive cells in color
+<li>n - show next alive cell in purple
+<li>p - draw percent alive
+</ul>
+
+<h3>To exit the game press q or ESC</h3>
+
 <h2>Using -color=true -next=false</h2>
 <img src="color.png">
 <h2>Using -color=true -next=true</h2>
