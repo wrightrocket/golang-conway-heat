@@ -2,11 +2,15 @@ package main
 
 import (
 	"fmt"
+	"github.com/4ydx/gltext"
 	"github.com/4ydx/gltext/v4.1"
+	"github.com/go-gl/gl/v4.1-core/gl" // OR: github.com/go-gl/gl/v2.1/gl
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/go-gl/mathgl/mgl32"
-	"github.com/go-gl/gl/all-core/gl" //v4.1-core/gl"  OR: github.com/go-gl/gl/v2.1/gl
+	"golang.org/x/image/math/fixed"
 	"log"
+	"os"
+	"runtime"
 	"strings"
 )
 
@@ -69,6 +73,7 @@ const (
 )
 
 var (
+	font                 *v41.Font
 	fragmentShaderBlue   uint32
 	fragmentShaderGreen  uint32
 	fragmentShaderPurple uint32
@@ -77,9 +82,7 @@ var (
 	fragmentShaderYellow uint32
 	fragmentVertexShader uint32
 
-//	height = width // assignment to variable not declared yet,yes!
-	height = 960
-	width = 1280
+	height = width // assignment to variable not declared yet,yes!
 	square = []float32{
 		-0.5, 0.5, 0,
 		-0.5, -0.5, 0,
@@ -89,11 +92,13 @@ var (
 		0.5, 0.5, 0,
 		0.5, -0.5, 0,
 	}
-
-//	width = 5 * grid // TODO
+	text                 *v41.Text
+	useStrictCoreProfile = (runtime.GOOS == "darwin")
+	// width = 500 
+	width = 5 * grid // TODO
 )
 
-func draw(cells [][]*cell, str string, window *glfw.Window) {
+func draw(cells [][]*cell, window *glfw.Window) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
 	gl.UseProgram(program)
 
@@ -102,21 +107,68 @@ func draw(cells [][]*cell, str string, window *glfw.Window) {
 			c.draw()
 		}
 	}
-	scaleMin := 0.5
-	scaleMax := 1.0
-	text := v41.NewText(font, float32(scaleMin), float32(scaleMax))
-	text.SetString(fmt.Sprintf(alivePercentString))
-	text.SetColor(mgl32.Vec3{1, 1, 1})
-	if len(str) > 0 {
+	if percent {
+		text.SetPosition(mgl32.Vec2{0, float32(height/2 - 50)})
 		text.Draw()
 		text.Show()
-	} else {
-		text.Hide()
 	}
 	glfw.PollEvents()
 	window.SwapBuffers()
 }
 
+func loadFontConfig() {
+
+	config, err := gltext.LoadTruetypeFontConfig("fontconfigs", "font_1_honokamin")
+	if err == nil {
+		font, err = v41.NewFont(config)
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println("Font loaded from disk...")
+	} else {
+		fd, err := os.Open("font/font_1_honokamin.ttf")
+		if err != nil {
+			panic(err)
+		}
+		defer fd.Close()
+
+		// Japanese character ranges
+		// http://www.rikai.com/library/kanjitables/kanji_codes.unicode.shtml
+		runeRanges := make(gltext.RuneRanges, 0)
+		runeRanges = append(runeRanges, gltext.RuneRange{Low: 32, High: 128})
+		runeRanges = append(runeRanges, gltext.RuneRange{Low: 0x3000, High: 0x3030})
+		runeRanges = append(runeRanges, gltext.RuneRange{Low: 0x3040, High: 0x309f})
+		runeRanges = append(runeRanges, gltext.RuneRange{Low: 0x30a0, High: 0x30ff})
+		runeRanges = append(runeRanges, gltext.RuneRange{Low: 0x4e00, High: 0x9faf})
+		runeRanges = append(runeRanges, gltext.RuneRange{Low: 0xff00, High: 0xffef})
+
+		scale := fixed.Int26_6(32)
+		runesPerRow := fixed.Int26_6(128)
+		config, err = gltext.NewTruetypeFontConfig(fd, scale, runeRanges, runesPerRow, 5)
+		if err != nil {
+			panic(err)
+		}
+		err = config.Save("fontconfigs", "font_1_honokamin")
+		if err != nil {
+			panic(err)
+		}
+		font, err = v41.NewFont(config)
+		if err != nil {
+			panic(err)
+		}
+	}
+	width, height := window.GetSize()
+	font.ResizeWindow(float32(width), float32(height))
+
+}
+func loadFontText(s string) {
+	scaleMin, scaleMax := float32(1.0), float32(1.1)
+	text = v41.NewText(font, scaleMin, scaleMax)
+	text.SetString(s)
+	text.SetColor(mgl32.Vec3{1, 1, 1})
+	text.FadeOutPerFrame = 0.01
+
+}
 func (c *cell) draw() {
 	if c.alive {
 		if showColor {
