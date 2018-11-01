@@ -34,6 +34,7 @@ var (
 	timeStart    = time.Now()
 	timeToSleep  time.Duration
 	timeTotal    = "0s"
+	window             *glfw.Window
 )
 
 func main() {
@@ -46,13 +47,13 @@ func main() {
 		timeLast           time.Time
 		turns              int
 		totalTime          time.Duration
-		window             *glfw.Window
 	)
 	parseFlags()
 	runtime.LockOSThread()
 	window = initGlfw()
 	defer glfw.Terminate()
 	initOpenGL()
+	loadFontConfig()
 	cells = makeCells()
 	cellsTotal = float64(len(cells) * 100.0)
 	for !window.ShouldClose() {
@@ -75,10 +76,10 @@ func main() {
 
 		draw(cells, window)
 
+
 		time.Sleep(time.Second/time.Duration(fps) - time.Since(timeLast))
 	}
 }
-
 func parseFlags() {
 	flag.BoolVar(&showColor, "c", showColor, "Same as -color.")
 	flag.BoolVar(&showColor, "color", showColor,
