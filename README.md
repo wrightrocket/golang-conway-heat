@@ -10,13 +10,13 @@ By default, the game will the following colors according to the number of neighb
 <li>next alive -> purple
 </ul>
 <h2>Using -color=true -next=false</h2>
-![color](https://github.com/wrightrocket/golang-conway-heat/blob/master/color.png)
+<img src="color.png">
 <h2>Using -color=true -next=true</h2>
-![color](https://github.com/wrightrocket/golang-conway-heat/blob/master/color-next.png)
+<img src="color-next.png">
 <h2>Using -color=false -next=false</h2>
-![color](https://github.com/wrightrocket/golang-conway-heat/blob/master/nocolor.png)
+<img src="nocolor.png">
 <h2>Using -color=false -next=true</h2>
-![color](https://github.com/wrightrocket/golang-conway-heat/blob/master/nocolor-next.png)
+<img src="nocolor-next.png">
 <br>
 
 <pre>
