@@ -77,8 +77,9 @@ var (
 	fragmentShaderYellow uint32
 	fragmentVertexShader uint32
 
-	height = width // assignment to variable not declared yet,yes!
-
+//	height = width // assignment to variable not declared yet,yes!
+	height = 960
+	width = 1280
 	square = []float32{
 		-0.5, 0.5, 0,
 		-0.5, -0.5, 0,
@@ -89,7 +90,7 @@ var (
 		0.5, -0.5, 0,
 	}
 
-	width = 5 * grid // TODO
+//	width = 5 * grid // TODO
 )
 
 func draw(cells [][]*cell, str string, window *glfw.Window) {

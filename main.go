@@ -26,7 +26,7 @@ func main() {
 		panic("glfw error")
 	}
 	defer glfw.Terminate()
-
+	//initOpenGL()
 //	version := gl.GoStr(gl.GetString(gl.VERSION))
 //	fmt.Println("Opengl version", version)
 
@@ -35,7 +35,7 @@ func main() {
 	// width, height := window.GetSize()
 //	font.ResizeWindow(float32(width), float32(height))
 
-	loadFont()
+//	loadFont()
 	gameloop()
 	//for _, text := range txts {
 	//		text.Release()

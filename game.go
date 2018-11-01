@@ -48,16 +48,23 @@ var (
 		window             *glfw.Window
 	)
 func gameloop() {
+	textString := "WrightRocket" // TODO: alivePercentString
+	for !window.ShouldClose() {
+		timeLast = time.Now()
+		draw(cells, textString, window)
+		time.Sleep(time.Second/time.Duration(fps) - time.Since(timeLast))
+	}
 /*	parseFlags()
 	runtime.LockOSThread()
 	window = initGlfw()
 	defer glfw.Terminate()
 	initOpenGL()
-	*/
+
 	// cells = makeCells()
 	// cellsTotal = float64(len(cells) * 100.0)
 	initGame()
 	for !window.ShouldClose() {
+		
 		timeLast = time.Now()
 		totalTime = time.Since(timeStart)
 		aliveTotalLast = aliveTotal
@@ -76,11 +83,11 @@ func gameloop() {
 		alivePercent := aliveTotal / cellsTotal * 100
 		alivePercentString := fmt.Sprintf("% 9.2f%%", alivePercent)
 		outputReport(aliveTotal, cellsTotal, turns)
-		textString := alivePercentString
+		textString := "WrightRocket" // TODO: alivePercentString
 		draw(cells, textString, window)
-
 		time.Sleep(time.Second/time.Duration(fps) - time.Since(timeLast))
 	}
+*/
 }
 
 func initGame() {
@@ -131,8 +138,8 @@ func validateSettings() {
 	if odds > 1.0 || odds < 0.01 {
 		odds = odds_default
 	}
-	//odds = float64(grid) / 100.0  * odds
-	width = 5 * grid // TODO
+	// odds = float64(grid) / 100.0  * odds // Something is odd about this calculation
+	// width = 5 * grid // TODO
 	height = width   // TODO
 	timeDuration, _ = time.ParseDuration(timeExpire)
 	timeToSleep, _ = time.ParseDuration(timeDelay) // TODO ERROR
