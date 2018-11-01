@@ -49,7 +49,7 @@ var (
 		turns              int
 		totalTime          time.Duration
 	)
-func gameloop() {
+func main() {
 	parseFlags()
 	runtime.LockOSThread()
 	window = initGlfw()
