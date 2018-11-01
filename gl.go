@@ -94,9 +94,31 @@ var (
 	}
 	text                 *v41.Text
 	useStrictCoreProfile = (runtime.GOOS == "darwin")
-	// width = 500 
+	// width = 500
 	width = 5 * grid // TODO
 )
+
+func compileShader(source string, shaderType uint32) (uint32, error) {
+	// compile the constants that define different shaders
+	shader := gl.CreateShader(shaderType)
+	csources, free := gl.Strs(source)
+	gl.ShaderSource(shader, 1, csources, nil)
+	free()
+	gl.CompileShader(shader)
+
+	var status int32
+	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &status)
+	if status == gl.FALSE {
+		var logLength int32
+		gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &logLength)
+
+		log := strings.Repeat("\x00", int(logLength+1))
+		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(log))
+
+		return 0, fmt.Errorf("failed to compile %v: %v", source, log)
+	}
+	return shader, nil
+}
 
 func draw(cells [][]*cell, window *glfw.Window) {
 	gl.Clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -116,8 +138,83 @@ func draw(cells [][]*cell, window *glfw.Window) {
 	window.SwapBuffers()
 }
 
-func loadFontConfig() {
+func (c *cell) draw() {
+	if c.alive {
+		if showColor {
+			gl.BindVertexArray(c.drawable)
+			gl.AttachShader(program, c.color)
+			gl.LinkProgram(program)
+			gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
+			gl.DetachShader(program, c.color)
 
+		} else {
+			gl.BindVertexArray(c.drawable)
+			gl.AttachShader(program, fragmentShaderWhite)
+			gl.LinkProgram(program)
+			gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
+			gl.DetachShader(program, fragmentShaderWhite)
+		}
+	} else if showNext && c.aliveNext {
+		gl.BindVertexArray(c.drawable)
+		gl.AttachShader(program, fragmentShaderPurple)
+		gl.LinkProgram(program)
+		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
+		gl.DetachShader(program, fragmentShaderPurple)
+	} else {
+		return
+	}
+}
+
+func initGlfw() *glfw.Window {
+	// initGlfw initializes glfw and returns a Window to use.
+	if err := glfw.Init(); err != nil {
+		panic(err)
+	}
+	glfw.WindowHint(glfw.Resizable, glfw.False)
+	glfw.WindowHint(glfw.ContextVersionMajor, 3)
+	glfw.WindowHint(glfw.ContextVersionMinor, 3)
+	if useStrictCoreProfile {
+		glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
+		glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
+	}
+	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
+	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
+	glfw.WindowHint(glfw.OpenGLDebugContext, glfw.True)
+	window, err := glfw.CreateWindow(width, height, "Conway's Game of Life", nil, nil)
+	if err != nil {
+		panic(err)
+	}
+	window.MakeContextCurrent()
+	return window
+}
+
+func initOpenGL() {
+	// initOpenGL initializes OpenGL and set global program.
+	var err error
+	if err = gl.Init(); err != nil {
+		panic(err)
+	}
+	version := gl.GoStr(gl.GetString(gl.VERSION))
+	log.Println("OpenGL version", version)
+
+	fragmentShaderBlue, err = compileShader(fragmentShaderSourceBlue, gl.FRAGMENT_SHADER)
+	fragmentShaderGreen, err = compileShader(fragmentShaderSourceGreen, gl.FRAGMENT_SHADER)
+	fragmentShaderPurple, err = compileShader(fragmentShaderSourcePurple, gl.FRAGMENT_SHADER)
+	fragmentShaderRed, err = compileShader(fragmentShaderSourceRed, gl.FRAGMENT_SHADER)
+	fragmentShaderWhite, err = compileShader(fragmentShaderSourceWhite, gl.FRAGMENT_SHADER)
+	fragmentShaderYellow, err = compileShader(fragmentShaderSourceYellow, gl.FRAGMENT_SHADER)
+	fragmentVertexShader, err := compileShader(fragmentVertexShaderSource, gl.VERTEX_SHADER)
+	if err != nil {
+		panic(err)
+	}
+
+	program = gl.CreateProgram()
+	gl.AttachShader(program, fragmentVertexShader)
+	gl.LinkProgram(program)
+}
+
+func loadFontConfig() {
+	// load a font configuration file and a font
 	config, err := gltext.LoadTruetypeFontConfig("fontconfigs", "font_1_honokamin")
 	if err == nil {
 		font, err = v41.NewFont(config)
@@ -161,86 +258,15 @@ func loadFontConfig() {
 	font.ResizeWindow(float32(width), float32(height))
 
 }
+
 func loadFontText(s string) {
+	// Set the string to rendered as a text font
 	scaleMin, scaleMax := float32(1.0), float32(1.1)
 	text = v41.NewText(font, scaleMin, scaleMax)
 	text.SetString(s)
 	text.SetColor(mgl32.Vec3{1, 1, 1})
 	text.FadeOutPerFrame = 0.01
 
-}
-func (c *cell) draw() {
-	if c.alive {
-		if showColor {
-			gl.BindVertexArray(c.drawable)
-			gl.AttachShader(program, c.color)
-			gl.LinkProgram(program)
-			gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
-			gl.DetachShader(program, c.color)
-
-		} else {
-			gl.BindVertexArray(c.drawable)
-			gl.AttachShader(program, fragmentShaderWhite)
-			gl.LinkProgram(program)
-			gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
-			gl.DetachShader(program, fragmentShaderWhite)
-		}
-	} else if showNext && c.aliveNext {
-		gl.BindVertexArray(c.drawable)
-		gl.AttachShader(program, fragmentShaderPurple)
-		gl.LinkProgram(program)
-		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
-		gl.DetachShader(program, fragmentShaderPurple)
-	} else {
-		return
-	}
-}
-// initGlfw initializes glfw and returns a Window to use.
-func initGlfw() *glfw.Window {
-	if err := glfw.Init(); err != nil {
-		panic(err)
-	}
-	glfw.WindowHint(glfw.Resizable, glfw.False)
-	glfw.WindowHint(glfw.ContextVersionMajor, 3)
-	glfw.WindowHint(glfw.ContextVersionMinor, 3)
-	if useStrictCoreProfile {
-		glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
-		glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
-	}
-	glfw.WindowHint(glfw.OpenGLProfile, glfw.OpenGLCoreProfile)
-	glfw.WindowHint(glfw.OpenGLForwardCompatible, glfw.True)
-	glfw.WindowHint(glfw.OpenGLDebugContext, glfw.True)
-	window, err := glfw.CreateWindow(width, height, "Conway's Game of Life", nil, nil)
-	if err != nil {
-		panic(err)
-	}
-	window.MakeContextCurrent()
-	return window
-}
-
-// initOpenGL initializes OpenGL and set global program.
-func initOpenGL() {
-	var err error
-	if err = gl.Init(); err != nil {
-		panic(err)
-	}
-	version := gl.GoStr(gl.GetString(gl.VERSION))
-	log.Println("OpenGL version", version)
-
-	fragmentShaderBlue, err = compileShader(fragmentShaderSourceBlue, gl.FRAGMENT_SHADER)
-	fragmentShaderGreen, err = compileShader(fragmentShaderSourceGreen, gl.FRAGMENT_SHADER)
-	fragmentShaderPurple, err = compileShader(fragmentShaderSourcePurple, gl.FRAGMENT_SHADER)
-	fragmentShaderRed, err = compileShader(fragmentShaderSourceRed, gl.FRAGMENT_SHADER)
-	fragmentShaderWhite, err = compileShader(fragmentShaderSourceWhite, gl.FRAGMENT_SHADER)
-	fragmentShaderYellow, err = compileShader(fragmentShaderSourceYellow, gl.FRAGMENT_SHADER)
-	fragmentVertexShader, err := compileShader(fragmentVertexShaderSource, gl.VERTEX_SHADER)
-	if err != nil {
-		panic(err)
-	}
-
-	program = gl.CreateProgram()
-	gl.AttachShader(program, fragmentVertexShader)
-	gl.LinkProgram(program)
 }
 
 // makeVao initializes and returns a vertex array from the points provided.
@@ -258,27 +284,4 @@ func makeVao(points []float32) uint32 {
 	gl.VertexAttribPointer(0, 3, gl.FLOAT, false, 0, nil)
 
 	return vao
-}
-
-func compileShader(source string, shaderType uint32) (uint32, error) {
-	shader := gl.CreateShader(shaderType)
-
-	csources, free := gl.Strs(source)
-	gl.ShaderSource(shader, 1, csources, nil)
-	free()
-	gl.CompileShader(shader)
-
-	var status int32
-	gl.GetShaderiv(shader, gl.COMPILE_STATUS, &status)
-	if status == gl.FALSE {
-		var logLength int32
-		gl.GetShaderiv(shader, gl.INFO_LOG_LENGTH, &logLength)
-
-		log := strings.Repeat("\x00", int(logLength+1))
-		gl.GetShaderInfoLog(shader, logLength, nil, gl.Str(log))
-
-		return 0, fmt.Errorf("failed to compile %v: %v", source, log)
-	}
-
-	return shader, nil
 }

@@ -39,16 +39,17 @@ var (
 	window             *glfw.Window
 )
 
-	var (
-		aliveTotal         float64
-		aliveTotalLast     float64
-		aliveTotalRepeated int
-		cells              [][]*cell
-		cellsTotal         float64
-		timeLast           time.Time
-		turns              int
-		totalTime          time.Duration
-	)
+var (
+	aliveTotal         float64
+	aliveTotalLast     float64
+	aliveTotalRepeated int
+	cells              [][]*cell
+	cellsTotal         float64
+	timeLast           time.Time
+	turns              int
+	totalTime          time.Duration
+)
+
 func main() {
 	parseFlags()
 	runtime.LockOSThread()
@@ -56,8 +57,44 @@ func main() {
 	defer glfw.Terminate()
 	initOpenGL()
 	loadFontConfig()
-	cells = makeCells()
-	cellsTotal = float64(len(cells) * 100.0)
+	initGame()
+	gameLoop()
+}
+
+func checkTurn(aliveTotal float64, aliveTotalLast float64, aliveTotalRepeated int, turns int, totalTime time.Duration) int {
+
+	if aliveTotal == 0 {
+		fmt.Println("Life has died out completely.")
+		os.Exit(EXIT_NO_LIFE)
+	}
+	if aliveTotal == aliveTotalLast {
+		aliveTotalRepeated += 1
+		if aliveTotalRepeated > 1 {
+			fmt.Println("Initial odds of life", fmt.Sprintf("% 5.2f%%",
+				odds), "has stabilized at", aliveTotal,
+				"lives after", turns, "turns")
+			fmt.Println("Delaying for", fmt.Sprintf("%s", timeToSleep))
+			time.Sleep(timeToSleep)
+			os.Exit(EXIT_STABLE_LIFE)
+		}
+	} else {
+		aliveTotalRepeated = 0
+	}
+	if timeDuration > time.Second && totalTime > timeDuration {
+		fmt.Println("Life has stopped running after", fmt.Sprintf("%v", timeExpire),
+			"according to the timeExpire parameter")
+		os.Exit(EXIT_TOTAL_TIME)
+	}
+
+	if maxTurns > 0 && turns > maxTurns {
+		fmt.Println("Life has stopped running after", fmt.Sprintf("%v", turns-1),
+			"turns, according to the maxTurns parameter")
+		os.Exit(EXIT_TOTAL_TURNS)
+	}
+	return aliveTotalRepeated
+}
+
+func gameLoop() {
 	for !window.ShouldClose() {
 		timeLast = time.Now()
 		totalTime = time.Since(timeStart)
@@ -87,6 +124,37 @@ func initGame() {
 	cellsTotal = float64(len(cells) * 100.0)
 
 }
+
+func outputReport(aliveTotal float64, cellsTotal float64, turns int) {
+	switch report {
+	case 1:
+		fmt.Println(alivePercentString, " life with", aliveTotal,
+			"cells alive and", cellsTotal, "total cells after", turns, "turns")
+	case 2:
+		fmt.Printf("%v,%v,%v,%5.2f\n", turns, aliveTotal, cellsTotal, alivePercent)
+	case 3:
+		fmt.Println(turns, aliveTotal, cellsTotal, alivePercentString)
+	case 4:
+		fmt.Println("Turn:", fmt.Sprintf("% 7.0f", float64(turns)),
+			"         Alive:", alivePercentString)
+	}
+}
+
+func outputSettings() {
+	fmt.Println("Using following values:")
+	fmt.Println("color", showColor)
+	fmt.Println("delay", timeDelay)
+	fmt.Println("expire", timeExpire)
+	fmt.Println("fps", fps)
+	fmt.Println("grid", grid)
+	fmt.Println("next", showNext)
+	fmt.Println("odds", odds)
+	fmt.Println("percent", percent)
+	fmt.Println("report", report)
+	fmt.Println("seed", seed)
+	fmt.Println("turns", maxTurns)
+}
+
 func parseFlags() {
 	flag.BoolVar(&showColor, "c", showColor, "Same as -color.")
 	flag.BoolVar(&showColor, "color", showColor,
@@ -134,70 +202,7 @@ func validateSettings() {
 	}
 	// odds = float64(grid) / 100.0  * odds // Something is odd about this calculation
 	// width = 5 * grid // TODO
-	height = width   // TODO
+	height = width // TODO
 	timeDuration, _ = time.ParseDuration(timeExpire)
 	timeToSleep, _ = time.ParseDuration(timeDelay) // TODO ERROR
-}
-
-func outputSettings() {
-	fmt.Println("Using following values:")
-	fmt.Println("color", showColor)
-	fmt.Println("delay", timeDelay)
-	fmt.Println("expire", timeExpire)
-	fmt.Println("fps", fps)
-	fmt.Println("grid", grid)
-	fmt.Println("next", showNext)
-	fmt.Println("odds", odds)
-	fmt.Println("percent", percent)
-	fmt.Println("report", report)
-	fmt.Println("seed", seed)
-	fmt.Println("turns", maxTurns)
-}
-
-func checkTurn(aliveTotal float64, aliveTotalLast float64, aliveTotalRepeated int, turns int, totalTime time.Duration) int {
-
-	if aliveTotal == 0 {
-		fmt.Println("Life has died out completely.")
-		os.Exit(EXIT_NO_LIFE)
-	}
-	if aliveTotal == aliveTotalLast {
-		aliveTotalRepeated += 1
-		if aliveTotalRepeated > 1 {
-			fmt.Println("Initial odds of life", fmt.Sprintf("% 5.2f%%",
-				odds), "has stabilized at", aliveTotal,
-				"lives after", turns, "turns")
-			fmt.Println("Delaying for", fmt.Sprintf("%s", timeToSleep))
-			time.Sleep(timeToSleep)
-			os.Exit(EXIT_STABLE_LIFE)
-		}
-	} else {
-		aliveTotalRepeated = 0
-	}
-	if timeDuration > time.Second && totalTime > timeDuration {
-		fmt.Println("Life has stopped running after", fmt.Sprintf("%v", timeExpire),
-			"according to the timeExpire parameter")
-		os.Exit(EXIT_TOTAL_TIME)
-	}
-
-	if maxTurns > 0 && turns > maxTurns {
-		fmt.Println("Life has stopped running after", fmt.Sprintf("%v", turns-1),
-			"turns, according to the maxTurns parameter")
-		os.Exit(EXIT_TOTAL_TURNS)
-	}
-	return aliveTotalRepeated
-}
-
-func outputReport(aliveTotal float64, cellsTotal float64, turns int) {
-	switch report {
-	case 1:
-		fmt.Println(alivePercentString, " life with", aliveTotal,
-			"cells alive and", cellsTotal, "total cells after", turns, "turns")
-	case 2:
-		fmt.Printf("%v,%v,%v,%5.2f\n", turns, aliveTotal, cellsTotal, alivePercent)
-	case 3:
-		fmt.Println(turns, aliveTotal, cellsTotal, alivePercentString)
-	case 4:
-		fmt.Println("Turn:", fmt.Sprintf("% 7.0f", float64(turns)),
-			"         Alive:", alivePercentString)
-	}
 }
