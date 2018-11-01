@@ -17,23 +17,25 @@ const (
 )
 
 var (
-	alivePercent = 0.0
-	fps          = 5
-	fps_default  = 5
-	grid         = 100 // TODO
-	maxTurns     = 0
-	odds         = 0.15
-	odds_default = 0.15
-	program      uint32
-	report       = 0
-	showColor    = true
-	showNext     = true
-	timeDelay    = "5s"
-	timeDuration time.Duration
-	timeExpire   = "0d0h0m0s"
-	timeStart    = time.Now()
-	timeToSleep  time.Duration
-	timeTotal    = "0s"
+	alivePercent       = 0.0
+	alivePercentString string
+	fps                = 5
+	fps_default        = 5
+	grid               = 100 // TODO
+	maxTurns           = 0
+	odds               = 0.15
+	odds_default       = 0.15
+	percent            = true
+	program            uint32
+	report             = 0
+	showColor          = true
+	showNext           = true
+	timeDelay          = "5s"
+	timeDuration       time.Duration
+	timeExpire         = "0d0h0m0s"
+	timeStart          = time.Now()
+	timeToSleep        time.Duration
+	timeTotal          = "0s"
 	window             *glfw.Window
 )
 
@@ -72,11 +74,11 @@ func main() {
 
 		turns += 1
 		aliveTotalRepeated = checkTurn(aliveTotal, aliveTotalLast, aliveTotalRepeated, turns, totalTime)
+		alivePercent := aliveTotal / cellsTotal * 100
+		alivePercentString = fmt.Sprintf("% 9.2f%%", alivePercent)
 		outputReport(aliveTotal, cellsTotal, turns)
-
+		loadFontText(alivePercentString + "%")
 		draw(cells, window)
-
-
 		time.Sleep(time.Second/time.Duration(fps) - time.Since(timeLast))
 	}
 }
@@ -102,6 +104,8 @@ func parseFlags() {
 	flag.Float64Var(&odds, "o", odds, "Same as -odds.")
 	flag.Float64Var(&odds, "odds", odds,
 		"A percentage between 0 and 1 to determine if a cell starts alive. For example, 0.15 means each cell has a 15% chance of starting alive.")
+	flag.BoolVar(&percent, "p", percent, "Same as -percent.")
+	flag.BoolVar(&percent, "percent", percent, "Draw percent alive")
 	flag.IntVar(&report, "r", report, "Same as -report.")
 	flag.IntVar(&report, "report", report,
 		"Sets the output report. 1: detailed, 2: comma separated, 3: space separated, 4: round number and alive percentage. The default is no output.")
@@ -139,6 +143,7 @@ func outputSettings() {
 	fmt.Println("grid", grid)
 	fmt.Println("next", showNext)
 	fmt.Println("odds", odds)
+	fmt.Println("percent", percent)
 	fmt.Println("report", report)
 	fmt.Println("seed", seed)
 	fmt.Println("turns", maxTurns)
@@ -178,8 +183,6 @@ func checkTurn(aliveTotal float64, aliveTotalLast float64, aliveTotalRepeated in
 }
 
 func outputReport(aliveTotal float64, cellsTotal float64, turns int) {
-	alivePercent := aliveTotal / cellsTotal * 100
-	alivePercentString := fmt.Sprintf("% 9.2f%%", alivePercent)
 	switch report {
 	case 1:
 		fmt.Println(alivePercentString, " life with", aliveTotal,

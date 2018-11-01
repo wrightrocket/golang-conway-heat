@@ -8,8 +8,8 @@ import (
 	"github.com/go-gl/glfw/v3.2/glfw"
 	"github.com/go-gl/mathgl/mgl32"
 	"golang.org/x/image/math/fixed"
-	"os"
 	"log"
+	"os"
 	"runtime"
 	"strings"
 )
@@ -73,7 +73,7 @@ const (
 )
 
 var (
-	font *v41.Font
+	font                 *v41.Font
 	fragmentShaderBlue   uint32
 	fragmentShaderGreen  uint32
 	fragmentShaderPurple uint32
@@ -93,7 +93,7 @@ var (
 		0.5, 0.5, 0,
 		0.5, -0.5, 0,
 	}
-	text *v41.Text
+	text                 *v41.Text
 	useStrictCoreProfile = (runtime.GOOS == "darwin")
 
 	width = 5 * grid // TODO
@@ -108,10 +108,11 @@ func draw(cells [][]*cell, window *glfw.Window) {
 			c.draw()
 		}
 	}
-	text.SetPosition(mgl32.Vec2{0, float32(30)})
-	text.Draw()
-	text.Show()
-
+	if percent {
+		text.SetPosition(mgl32.Vec2{0, float32(height/2 - 50)})
+		text.Draw()
+		text.Show()
+	}
 	glfw.PollEvents()
 	window.SwapBuffers()
 }
@@ -157,15 +158,17 @@ func loadFontConfig() {
 			panic(err)
 		}
 	}
-
 	width, height := window.GetSize()
 	font.ResizeWindow(float32(width), float32(height))
-	str := "By Keith Wright (wrightrocket)"
+
+}
+func loadFontText(s string) {
 	scaleMin, scaleMax := float32(1.0), float32(1.1)
 	text = v41.NewText(font, scaleMin, scaleMax)
-	text.SetString(str)
+	text.SetString(s)
 	text.SetColor(mgl32.Vec3{1, 1, 1})
 	text.FadeOutPerFrame = 0.01
+
 }
 func (c *cell) draw() {
 	if c.alive {
