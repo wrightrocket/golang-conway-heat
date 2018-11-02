@@ -15,6 +15,13 @@ import (
 )
 
 const (
+	fragmentShaderSourceAqua = `
+		#version 410
+		out vec4 frag_colour;
+		void main() {
+			frag_colour = vec4(0, 0.5, 0.5, 0.01);
+		}
+	` + "\x00"
 	fragmentShaderSourceBlue = `
 		#version 410
 		out vec4 frag_colour;
@@ -74,6 +81,7 @@ const (
 
 var (
 	font                 *v41.Font
+	fragmentShaderAqua   uint32
 	fragmentShaderBlue   uint32
 	fragmentShaderGreen  uint32
 	fragmentShaderPurple uint32
@@ -139,6 +147,7 @@ func draw(cells [][]*cell, window *glfw.Window) {
 }
 
 func (c *cell) draw() {
+
 	if c.alive {
 		if showColor {
 			gl.BindVertexArray(c.drawable)
@@ -160,6 +169,12 @@ func (c *cell) draw() {
 		gl.LinkProgram(program)
 		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
 		gl.DetachShader(program, fragmentShaderPurple)
+	} else if showLife && c.lived {
+		gl.BindVertexArray(c.drawable)
+		gl.AttachShader(program, fragmentShaderAqua)
+		gl.LinkProgram(program)
+		gl.DrawArrays(gl.TRIANGLES, 0, int32(len(square)/3))
+		gl.DetachShader(program, fragmentShaderAqua)
 	} else {
 		return
 	}
@@ -197,6 +212,7 @@ func initOpenGL() {
 	version := gl.GoStr(gl.GetString(gl.VERSION))
 	log.Println("OpenGL version", version)
 
+	fragmentShaderAqua, err = compileShader(fragmentShaderSourceAqua, gl.FRAGMENT_SHADER)
 	fragmentShaderBlue, err = compileShader(fragmentShaderSourceBlue, gl.FRAGMENT_SHADER)
 	fragmentShaderGreen, err = compileShader(fragmentShaderSourceGreen, gl.FRAGMENT_SHADER)
 	fragmentShaderPurple, err = compileShader(fragmentShaderSourcePurple, gl.FRAGMENT_SHADER)

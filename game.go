@@ -22,13 +22,14 @@ var (
 	alivePercentString string
 	fps                = 5
 	fps_default        = 5
-	grid               = 100 // TODO
+	grid               = 100
 	maxTurns           = 0
-	odds               = 0.15
-	odds_default       = 0.15
+	odds               = 0.07
+	odds_default       = 0.05
 	program            uint32
 	report             = 0
 	showColor          = true
+	showLife           = true
 	showNext           = true
 	showPercent        = true
 	timeDelay          = "5s"
@@ -122,12 +123,14 @@ func gameLoop() {
 }
 
 func initGame() {
+	// create the cells
 	cells = makeCells()
-	cellsTotal = float64(len(cells) * 100.0)
+	cellsTotal = float64(len(cells) * 100)
 
 }
 
 func keyCallBack(w *glfw.Window, k glfw.Key, s int, a glfw.Action, mk glfw.ModifierKey) {
+	// check the key that is pressed
 	if a == glfw.Press {
 		if k == glfw.KeyEscape || k == glfw.KeyQ {
 			window.SetShouldClose(true)
@@ -135,6 +138,8 @@ func keyCallBack(w *glfw.Window, k glfw.Key, s int, a glfw.Action, mk glfw.Modif
 			os.Exit(EXIT_KEYPRESS)
 		} else if k == glfw.KeyC {
 			showColor = !showColor
+		} else if k == glfw.KeyL {
+			showLife = !showLife
 		} else if k == glfw.KeyN {
 			showNext = !showNext
 		} else if k == glfw.KeyP {
@@ -165,6 +170,7 @@ func outputSettings() {
 	fmt.Println("expire", timeExpire)
 	fmt.Println("fps", fps)
 	fmt.Println("grid", grid)
+	fmt.Println("life", showLife)
 	fmt.Println("next", showNext)
 	fmt.Println("odds", odds)
 	fmt.Println("percent", showPercent)
@@ -189,6 +195,8 @@ func parseFlags() {
 	flag.IntVar(&grid, "g", grid, "Same as -grid.")
 	flag.IntVar(&grid, "grid", grid,
 		"Sets both the number of rows and columns for the game grid.")
+	flag.BoolVar(&showLife, "l", showLife, "Same as -life.")
+	flag.BoolVar(&showLife, "lived", showLife, "Show cells that have lived in aqua color.")
 	flag.BoolVar(&showNext, "n", showNext, "Same as -next.")
 	flag.BoolVar(&showNext, "next", showNext,
 		"Boolean to determine if next alive cell is shown as a purple color. ")

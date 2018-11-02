@@ -12,7 +12,8 @@ By default, the game will the following colors according to the number of neighb
 <h2>Using the keyboard</h2>
 While the game is running you can press the follow keys to toggle:
 <ul>
-<li>c - show alive cells in color
+<li>c - show alive cells in blue, green, yellow or red
+<li>l - show lived cells in aqua
 <li>n - show next alive cell in purple
 <li>p - draw percent alive
 </ul>
@@ -27,6 +28,10 @@ While the game is running you can press the follow keys to toggle:
 <img src="nocolor.png">
 <h2>Using -color=false -next=true</h2>
 <img src="nocolor-next.png">
+<h2>Using -lived=true</h2>
+<img src="lived.png">
+<h2>Using -percent=true</h2>
+<img src="percent.png">
 <br>
 
 <pre>

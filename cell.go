@@ -15,9 +15,9 @@ type cell struct {
 	alive     bool
 	aliveNext bool
 	color     uint32
-
-	x int
-	y int
+	lived     bool
+	x         int
+	y         int
 }
 
 func makeCells() [][]*cell {
@@ -33,7 +33,7 @@ func makeCells() [][]*cell {
 
 			c.alive = rand.Float64() < odds
 			c.aliveNext = c.alive
-
+			c.lived = false
 			cells[x] = append(cells[x], c)
 		}
 	}
@@ -80,6 +80,7 @@ func (c *cell) checkState(cells [][]*cell) {
 
 	liveCount := c.liveNeighbors(cells)
 	if c.alive {
+		c.lived = true
 		// 1. Any live cell with fewer than two live neighbours dies, as if caused by underpopulation.
 		if liveCount < 2 {
 			c.aliveNext = false
