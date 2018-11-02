@@ -113,8 +113,8 @@ func gameLoop() {
 		}
 		turns += 1
 		aliveTotalRepeated = checkTurn(aliveTotal, aliveTotalLast, aliveTotalRepeated, turns, totalTime)
-		alivePercent := aliveTotal / cellsTotal * 100
-		alivePercentString := fmt.Sprintf("% 9.2f%%", alivePercent)
+		alivePercent = aliveTotal / cellsTotal * 100
+		alivePercentString = fmt.Sprintf("% 9.2f%%", alivePercent)
 		outputReport(aliveTotal, cellsTotal, turns)
 		loadFontText(alivePercentString + "%")
 		draw(cells, window)
@@ -159,7 +159,7 @@ func outputReport(aliveTotal float64, cellsTotal float64, turns int) {
 		fmt.Println(alivePercentString, " life with", aliveTotal,
 			"cells alive and", cellsTotal, "total cells after", turns, "turns")
 	case 2:
-		fmt.Printf("%v,%v,%v,%5.2f\n", turns, aliveTotal, cellsTotal, alivePercent)
+		fmt.Printf("%v,%v,%v,%05.2f\n", turns, aliveTotal, cellsTotal, alivePercent)
 	case 3:
 		fmt.Println(turns, aliveTotal, cellsTotal, alivePercentString)
 	case 4:
