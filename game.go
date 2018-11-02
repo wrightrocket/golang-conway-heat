@@ -27,11 +27,11 @@ var (
 	odds               = 0.07
 	odds_default       = 0.05
 	program            uint32
-	report             = 0
 	showColor          = true
 	showLife           = true
 	showNext           = true
 	showPercent        = true
+	showReport             = 0
 	timeDelay          = "5s"
 	timeDuration       time.Duration
 	timeExpire         = "0d0h0m0s"
@@ -144,12 +144,17 @@ func keyCallBack(w *glfw.Window, k glfw.Key, s int, a glfw.Action, mk glfw.Modif
 			showNext = !showNext
 		} else if k == glfw.KeyP {
 			showPercent = !showPercent
+		} else if k == glfw.KeyR {
+			showReport += 1
+			if showReport > 4 {
+				showReport = 0
+			}
 		}
 	}
 }
 
 func outputReport(aliveTotal float64, cellsTotal float64, turns int) {
-	switch report {
+	switch showReport {
 	case 1:
 		fmt.Println(alivePercentString, " life with", aliveTotal,
 			"cells alive and", cellsTotal, "total cells after", turns, "turns")
@@ -174,7 +179,7 @@ func outputSettings() {
 	fmt.Println("next", showNext)
 	fmt.Println("odds", odds)
 	fmt.Println("percent", showPercent)
-	fmt.Println("report", report)
+	fmt.Println("report", showReport)
 	fmt.Println("seed", seed)
 	fmt.Println("turns", maxTurns)
 }
@@ -205,9 +210,9 @@ func parseFlags() {
 		"A percentage between 0 and 1 to determine if a cell starts alive. For example, 0.15 means each cell has a 15% chance of starting alive.")
 	flag.BoolVar(&showPercent, "p", showPercent, "Same as -percent.")
 	flag.BoolVar(&showPercent, "percent", showPercent, "Draw percent alive")
-	flag.IntVar(&report, "r", report, "Same as -report.")
-	flag.IntVar(&report, "report", report,
-		"Sets the output report. 1: detailed, 2: comma separated, 3: space separated, 4: round number and alive percentage. The default is no output.")
+	flag.IntVar(&showReport, "r", showReport, "Same as -showReport.")
+	flag.IntVar(&showReport, "report", showReport,
+		"Sets the output showReport. 1: detailed, 2: comma separated, 3: space separated, 4: round number and alive percentage. The default is no output.")
 	flag.Int64Var(&seed, "s", seed, "Same as -seed.")
 	flag.Int64Var(&seed, "seed", seed,
 		"Sets the starting seed of the game, used to randomize the initial state.")
