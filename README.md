@@ -16,6 +16,7 @@ While the game is running you can press the follow keys to toggle:
 <li>l - show lived cells in aqua
 <li>n - show next alive cell in purple
 <li>p - draw percent alive
+<li>r - change report output
 </ul>
 
 <h3>To exit the game press q or ESC</h3>
