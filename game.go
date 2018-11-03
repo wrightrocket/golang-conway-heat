@@ -65,17 +65,17 @@ func main() {
 }
 
 func checkTurn(aliveTotal float64, aliveTotalLast float64, aliveTotalRepeated int, turns int, totalTime time.Duration) int {
-
+	stableTimes := 3
 	if aliveTotal == 0 {
 		fmt.Println("Life has died out completely.")
 		os.Exit(EXIT_NO_LIFE)
 	}
 	if aliveTotal == aliveTotalLast {
 		aliveTotalRepeated += 1
-		if aliveTotalRepeated > 3 {
+		if aliveTotalRepeated > stableTimes {
 			fmt.Println("Initial odds of life", fmt.Sprintf("% 5.2f%%",
 				odds), "has stabilized at", aliveTotal,
-				"lives after", turns-3, "turns")
+				"lives after", turns - stableTimes, "turns")
 			fmt.Println("Delaying for", fmt.Sprintf("%s", timeToSleep))
 			time.Sleep(timeToSleep)
 			os.Exit(EXIT_STABLE_LIFE)
@@ -85,13 +85,13 @@ func checkTurn(aliveTotal float64, aliveTotalLast float64, aliveTotalRepeated in
 	}
 	if timeDuration > time.Second && totalTime > timeDuration {
 		fmt.Println("Life has stopped running after", fmt.Sprintf("%v", timeExpire),
-			"according to the timeExpire parameter")
+			"according to the timeExpire parameter, -e or -expire")
 		os.Exit(EXIT_TOTAL_TIME)
 	}
 
 	if maxTurns > 0 && turns > maxTurns {
 		fmt.Println("Life has stopped running after", fmt.Sprintf("%v", turns-1),
-			"turns, according to the maxTurns parameter")
+			"turns, according to the maxTurns parameter, -t or -turns")
 		os.Exit(EXIT_TOTAL_TURNS)
 	}
 	return aliveTotalRepeated
