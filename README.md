@@ -8,12 +8,13 @@ By default, the game will the following colors according to the number of neighb
 <li>3 -> yellow
 <li>4 or more -> red
 <li>next alive -> purple
+<li>previously alive -> aqua
 </ul>
 <h2>Using the keyboard</h2>
 While the game is running you can press the follow keys to toggle:
 <ul>
 <li>c - show alive cells in blue, green, yellow or red
-<li>l - show lived cells in aqua
+<li>l - show previously alive cells in aqua
 <li>n - show next alive cell in purple
 <li>p - draw percent alive
 <li>r - change report output
@@ -55,7 +56,10 @@ Usage of ./golang-conway-heat:
   -g int
     	Same as -grid. (default 100)
   -grid int
-    	Sets both the number of rows and columns for the game grid. (default 100)
+    	Sets both the number of rows and columns for the game grid. (default 100)  
+  -l	Same as -lived. (default true)
+  -lived
+    	Show cells that have lived in aqua color. (default true)    
   -n	Same as -next. (default true)
   -next
     	Boolean to determine if next alive cell is shown as a purple color.  (default true)
