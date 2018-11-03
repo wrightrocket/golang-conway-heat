@@ -8,12 +8,13 @@ By default, the game will the following colors according to the number of neighb
 <li>3 -> yellow
 <li>4 or more -> red
 <li>next alive -> purple
+<li>previously alive -> aqua
 </ul>
 <h2>Using the keyboard</h2>
 While the game is running you can press the follow keys to toggle:
 <ul>
 <li>c - show alive cells in blue, green, yellow or red
-<li>l - show lived cells in aqua
+<li>l - show previously alive cells in aqua
 <li>n - show next alive cell in purple
 <li>p - draw percent alive
 <li>r - change report output
