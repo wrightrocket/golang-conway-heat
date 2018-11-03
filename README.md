@@ -56,7 +56,10 @@ Usage of ./golang-conway-heat:
   -g int
     	Same as -grid. (default 100)
   -grid int
-    	Sets both the number of rows and columns for the game grid. (default 100)
+    	Sets both the number of rows and columns for the game grid. (default 100)  
+  -l	Same as -lived. (default true)
+  -lived
+    	Show cells that have lived in aqua color. (default true)    
   -n	Same as -next. (default true)
   -next
     	Boolean to determine if next alive cell is shown as a purple color.  (default true)
