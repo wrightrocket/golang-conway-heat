@@ -28,10 +28,10 @@ var (
 	odds_default       = 0.05
 	program            uint32
 	showColor          = true
-	showLife           = true
+	showLife           = false
 	showNext           = true
 	showPercent        = true
-	showReport             = 0
+	showReport         = 0
 	timeDelay          = "5s"
 	timeDuration       time.Duration
 	timeExpire         = "0d0h0m0s"
@@ -72,10 +72,10 @@ func checkTurn(aliveTotal float64, aliveTotalLast float64, aliveTotalRepeated in
 	}
 	if aliveTotal == aliveTotalLast {
 		aliveTotalRepeated += 1
-		if aliveTotalRepeated > 1 {
+		if aliveTotalRepeated > 3 {
 			fmt.Println("Initial odds of life", fmt.Sprintf("% 5.2f%%",
 				odds), "has stabilized at", aliveTotal,
-				"lives after", turns, "turns")
+				"lives after", turns-3, "turns")
 			fmt.Println("Delaying for", fmt.Sprintf("%s", timeToSleep))
 			time.Sleep(timeToSleep)
 			os.Exit(EXIT_STABLE_LIFE)
@@ -149,22 +149,28 @@ func keyCallBack(w *glfw.Window, k glfw.Key, s int, a glfw.Action, mk glfw.Modif
 			if showReport > 4 {
 				showReport = 0
 			}
+			fmt.Printf("Report format -report=%d\n", showReport)
 		}
 	}
 }
 
 func outputReport(aliveTotal float64, cellsTotal float64, turns int) {
 	switch showReport {
+	case 0:
+		fmt.Println(alivePercentString, "life with", fmt.Sprintf("%4.0f", aliveTotal),
+			"cells alive of", cellsTotal, "total cells after", fmt.Sprintf("%5.0f", float64(turns)), "turns")
 	case 1:
-		fmt.Println(alivePercentString, " life with", aliveTotal,
-			"cells alive and", cellsTotal, "total cells after", turns, "turns")
+		fmt.Printf("%v,%v,%v,%04.2f\n", turns, aliveTotal, cellsTotal, alivePercent)
 	case 2:
-		fmt.Printf("%v,%v,%v,%05.2f\n", turns, aliveTotal, cellsTotal, alivePercent)
-	case 3:
 		fmt.Println(turns, aliveTotal, cellsTotal, alivePercentString)
-	case 4:
+	case 3:
 		fmt.Println("Turn:", fmt.Sprintf("% 7.0f", float64(turns)),
-			"         Alive:", alivePercentString)
+			"    Alive:", alivePercentString)
+	case 4:
+		fmt.Printf("%v\t%v\t%v\t%4.2f\n", turns, aliveTotal, cellsTotal, alivePercent)
+	default:
+		fmt.Println(alivePercentString, "life with", fmt.Sprintf("%4.0f", aliveTotal),
+			"cells alive and", cellsTotal, "total cells after", turns, "turns")
 	}
 }
 
@@ -175,13 +181,21 @@ func outputSettings() {
 	fmt.Println("expire", timeExpire)
 	fmt.Println("fps", fps)
 	fmt.Println("grid", grid)
-	fmt.Println("life", showLife)
+	fmt.Println("lived", showLife)
 	fmt.Println("next", showNext)
 	fmt.Println("odds", odds)
 	fmt.Println("percent", showPercent)
 	fmt.Println("report", showReport)
 	fmt.Println("seed", seed)
 	fmt.Println("turns", maxTurns)
+	outputCli()
+}
+
+func outputCli() {
+	fmt.Printf("CLI equivalent: ./golang-conway-heat -color=%t -delay=%s -expire=%s -fps=%d -grid=%d -lived=%t -next=%t -odds=%4.2f -percent=%t -report=%v -seed=%v -turns=%d\n",
+		showColor, timeDelay, timeExpire, fps, grid, showLife, showNext, odds, showPercent, showReport, seed, maxTurns)
+	fmt.Printf("or with short options: ./golang-conway-heat -c=%t -d=%s -e=%s -f=%d -g=%d -l=%t -n=%t -o=%4.2f -p=%t -r=%v -s=%v -t=%d\n",
+		showColor, timeDelay, timeExpire, fps, grid, showLife, showNext, odds, showPercent, showReport, seed, maxTurns)
 }
 
 func parseFlags() {
@@ -200,7 +214,7 @@ func parseFlags() {
 	flag.IntVar(&grid, "g", grid, "Same as -grid.")
 	flag.IntVar(&grid, "grid", grid,
 		"Sets both the number of rows and columns for the game grid.")
-	flag.BoolVar(&showLife, "l", showLife, "Same as -life.")
+	flag.BoolVar(&showLife, "l", showLife, "Same as -lived.")
 	flag.BoolVar(&showLife, "lived", showLife, "Show cells that have lived in aqua color.")
 	flag.BoolVar(&showNext, "n", showNext, "Same as -next.")
 	flag.BoolVar(&showNext, "next", showNext,
