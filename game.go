@@ -138,12 +138,33 @@ func keyCallBack(w *glfw.Window, k glfw.Key, s int, a glfw.Action, mk glfw.Modif
 			os.Exit(EXIT_KEYPRESS)
 		} else if k == glfw.KeyC {
 			showColor = !showColor
+			if showColor {
+				fmt.Println("c for -showColor=true key press")
+			} else {
+				fmt.Println("c for -showColor=false key press")
+			}
+
 		} else if k == glfw.KeyL {
 			showLife = !showLife
+			if showLife {
+				fmt.Println("l for -showLife=true key press")
+			} else {
+				fmt.Println("l for -showLife=false key press")
+			}
 		} else if k == glfw.KeyN {
 			showNext = !showNext
+			if showNext {
+				fmt.Println("n for -showNext=true key press")
+			} else {
+				fmt.Println("n for -showNext=false key press")
+			}
 		} else if k == glfw.KeyP {
 			showPercent = !showPercent
+			if showPercent {
+				fmt.Println("p for -showPercent=true key press")
+			} else {
+				fmt.Println("p for -showPercent=false key press")
+			}
 		} else if k == glfw.KeyR {
 			showReport += 1
 			if showReport > 4 {
