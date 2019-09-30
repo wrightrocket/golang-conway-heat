@@ -3,12 +3,12 @@ Install the go language for your platform.
 Configure your home directory for go.
 
 # Running golang-conway-heat
-cd 
-mkdir -p go/src/
-go get github.com/wrightrocket/golang-conway-heat
-cd github.com/wrightrocket/golang-conway-heat
-go build
-./golang-conway-heat
+<br>cd 
+<br>mkdir -p go/src/
+<br>go get github.com/wrightrocket/golang-conway-heat
+<br>cd github.com/wrightrocket/golang-conway-heat
+<br>go build
+<br>./golang-conway-heat
 
 # golang-conway-heat
 Conway's Game of Life written in Go with heat map color to show neighbor density 
