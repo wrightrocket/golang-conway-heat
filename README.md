@@ -6,7 +6,7 @@ Configure your home directory for go.
 <br>cd 
 <br>mkdir -p go/src/
 <br>go get github.com/wrightrocket/golang-conway-heat
-<br>cd github.com/wrightrocket/golang-conway-heat
+<br>cd go/src/github.com/wrightrocket/golang-conway-heat
 <br>go build
 <br>./golang-conway-heat
 
