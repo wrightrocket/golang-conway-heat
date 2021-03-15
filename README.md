@@ -1,13 +1,27 @@
-# Prerequisites for golang-conway-heat
-Install the go language for your platform.
-Configure your home directory for go.
+# Ubuntu Package Requirements
+apt install build-essentail golang liblxi1 libx11-dev libxcursor-dev libxi-dev \
+libxinerama1 libxinerama-dev libxrandr-dev libxxf86vm-dev mesa-common-dev
 
-# Running golang-conway-heat
+# Go Package Requirements
+go get github.com/4ydx/gltext
+go get github.com/go-gl/glfw/v3.2/glfw
+go get github.com/go-gl/gl/v4.1-core/gl
+go get github.com/go-gl/mathgl/mgl32
+go get golang.org/x/image/math/fixed
+
+# Prerequisites for golang-conway-heat
+Graphical User Interface (GUI) needed for display.
+Installation of the go language for your platform.
+Configuration for your go home directory.
+
+# Building golang-conway-heat
 <br>cd 
 <br>mkdir -p go/src/
 <br>go get github.com/wrightrocket/golang-conway-heat
 <br>cd go/src/github.com/wrightrocket/golang-conway-heat
 <br>go build
+
+# Running golang-conway-heat
 <br>./golang-conway-heat
 
 # golang-conway-heat
